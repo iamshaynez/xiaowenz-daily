@@ -28,6 +28,17 @@ jobs:
           TG_CHAT_ID=: ${{ secrets.TG_CHAT_ID }}
         run: |
           echo "TG_CHAT_ID=${{ secrets.TG_CHAT_ID }}"
+      - name: Set Env Secrets
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          TIAN_API_KEY: ${{ secrets.TIAN_API_KEY }}
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_CHAT_ID=: ${{ secrets.TG_CHAT_ID }}
+        run: |
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
+          echo "TIAN_API_KEY=${{ secrets.TIAN_API_KEY }}" >> .env
+          echo "TG_BOT_TOKEN=${{ secrets.TG_BOT_TOKEN }}" >> .env
+          echo "TG_CHAT_ID=${{ secrets.TG_CHAT_ID }}" >> .env
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
