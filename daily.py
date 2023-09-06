@@ -30,7 +30,7 @@ def make_pic(sentence):
     
     openai.api_key = OPENAI_API_KEY
     response = openai.Image.create(prompt=sentence, n=1, size="1024x1024")
-    print(f'make pic response: {response.json()}')
+    #print(f'make pic response: {response.json()}')
     image_url = response["data"][0]["url"]
 
     # s = requests.session()
