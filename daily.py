@@ -140,12 +140,12 @@ def main():
         weather=weather, one=one, poem=poem
     )
     
-    #image_url = make_pic(sentence)
+    image_url = make_pic(sentence)
 
     print("Message constructed...")
     print(body)
     print("Sending to Telegram...")
-    r_json = send_tg_message(tg_bot_token=TG_BOT_TOKEN, tg_chat_id=TG_CHAT_ID, message=body, image=None)
+    r_json = send_tg_message(tg_bot_token=TG_BOT_TOKEN, tg_chat_id=TG_CHAT_ID, message=body, image=image_url)
     print(r_json)
 
 if __name__ == "__main__":
