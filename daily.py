@@ -149,9 +149,5 @@ def main():
     print(r_json)
 
 if __name__ == "__main__":
-    #poem = get_poem()
-    #url = make_pic_and_save(poem)
-    #print(url)
-    #send_tg_message(tg_bot_token=TG_BOT_TOKEN, tg_chat_id=TG_CHAT_ID, message="Test", image="https://oaidalleapiprodscus.blob.core.windows.net/private/org-zfDwAeW4HeXmUDQYZINhnDTf/user-FkIh7lQLYN1ZRC4TjgNfCpOp/img-CGcGzfRToYoKCU2OLmeoqamc.png?st=2023-09-06T04%3A32%3A34Z&se=2023-09-06T06%3A32%3A34Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-09-05T07%3A50%3A34Z&ske=2023-09-06T07%3A50%3A34Z&sks=b&skv=2021-08-06&sig=X%2BII/Namoow1wCQ%2BzPuJ8Mb%2BsLQkx1Wem/vHvtjuwLs%3D")
     main()
 
