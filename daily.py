@@ -101,6 +101,7 @@ def get_weather():
         return DEFAULT_WEATHER
 
 def send_tg_message(tg_bot_token, tg_chat_id, message, image = None):
+    print(f'Sending to Chat {tg_chat_id}')
     if image is None:
         try:
             request_url = "https://api.telegram.org/bot{tg_bot_token}/sendMessage".format(tg_bot_token = tg_bot_token)
