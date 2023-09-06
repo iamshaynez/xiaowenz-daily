@@ -13,8 +13,10 @@ load_dotenv()
 # required APIs
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 TIAN_API_KEY = os.getenv('TIAN_API_KEY') # https://www.tianapi.com/console/
+TG_BOT_TOKEN = os.getenv('TG_BOT_TOKEN')
+TG_CHAT_ID = os.getenv('TG_CHAT_ID')
 
-def make_pic_and_save(sentence):
+def make_pic(sentence):
     """
     return the link for md
     """
@@ -29,31 +31,37 @@ def make_pic_and_save(sentence):
     openai.api_key = OPENAI_API_KEY
     response = openai.Image.create(prompt=sentence, n=1, size="1024x1024")
     image_url = response["data"][0]["url"]
-    s = requests.session()
-    index = 0
-    while os.path.exists(os.path.join(new_path, f"{index}.jpeg")):
-        index += 1
-    with s.get(image_url, stream=True) as response:
-        # save response to file
-        response.raise_for_status()
-        with open(os.path.join(new_path, f"{index}.jpeg"), "wb") as output_file:
-            for chunk in response.iter_content(chunk_size=8192):
-                output_file.write(chunk)
+    # s = requests.session()
+    # index = 0
+    # while os.path.exists(os.path.join(new_path, f"{index}.jpeg")):
+    #     index += 1
+    # with s.get(image_url, stream=True) as response:
+    #     # save response to file
+    #     response.raise_for_status()
+    #     with open(os.path.join(new_path, f"{index}.jpeg"), "wb") as output_file:
+    #         for chunk in response.iter_content(chunk_size=8192):
+    #             output_file.write(chunk)
     
     return image_url
 
 def get_poem():
     SENTENCE_API = "https://v1.jinrishici.com/all"
     DEFAULT_SENTENCE = "落日净残阳\r\n雾水拈薄浪\r\n"
+    DEFAULT_POEM = "落日净残阳，雾水拈薄浪。 —— Xiaowen.Z / 卜算子"
+    POEM_TEMPLATE = "{sentence} —— {author} / {origin}"
 
     try:
         r = requests.get(SENTENCE_API)
         if r.ok:
-            return r.json().get("content", DEFAULT_SENTENCE)
-        return DEFAULT_SENTENCE
-    except:
-        print("get SENTENCE_API wrong")
-        return DEFAULT_SENTENCE
+            sentence = r.json().get("content")
+            poem = POEM_TEMPLATE.format(
+                sentence = sentence, author=r.json().get("author"), origin=r.json().get("origin")
+            )
+            return sentence, poem
+        return DEFAULT_SENTENCE, DEFAULT_POEM
+    except Exception as e:
+        print(type(e), e) 
+        return DEFAULT_SENTENCE, DEFAULT_POEM
 
 def get_one():
     ONE_API = "https://apis.tianapi.com/dictum/index?key={TIAN_API_KEY}&num=1".format(TIAN_API_KEY=TIAN_API_KEY)
@@ -67,8 +75,8 @@ def get_one():
             )
             return one
         return DEFAULT_ONE
-    except:
-        print("get ONE_API wrong")
+    except Exception as e:
+        print(type(e), e) 
         return DEFAULT_ONE
 
 def get_weather():
@@ -88,22 +96,49 @@ def get_weather():
             )
             return weather
         return DEFAULT_WEATHER
-    except:
-        print("get weather failed")
+    except Exception as e:
+        print(type(e), e) 
         return DEFAULT_WEATHER
 
+def send_tg_message(tg_bot_token, tg_chat_id, message, image = None):
+    if image is None:
+        try:
+            request_url = "https://api.telegram.org/bot{tg_bot_token}/sendMessage".format(tg_bot_token = tg_bot_token)
+            request_data = {'chat_id': tg_chat_id, 'text': message}
+            response = requests.post(request_url, data=request_data)
+        except Exception as e:
+            print("Failed sending message to Telegram Bot.") 
+            print(type(e), e) 
+    else:
+        try:
+            photo_url = image
+            request_url = "https://api.telegram.org/bot{tg_bot_token}/sendPhoto".format(tg_bot_token = tg_bot_token)
+            request_data = {'chat_id': tg_chat_id, 'photo': photo_url, 'caption': message}
+            response = requests.post(request_url, data=request_data)
+        except Exception as e:
+            print("Failed sending message to Telegram Bot with image.") 
+            print(type(e), e) 
+
+
 def main():
-    DAILY_TEMPLATE = "又到了新的一天了！{weather}\r\n今日名言：{one}\r\n今日诗词：{poem}\r\nHave a good day, good luck!"
+    DAILY_TEMPLATE = "又到了新的一天了！\r\n---\r\n{weather}\r\n---\r\n今日名言：{one}\r\n---\r\n今日诗词：{poem}\r\n---\r\nHave a good day, good luck!"
     one = get_one()
-    poem = get_poem()
+    sentence, poem = get_poem()
     weather = get_weather()
     body = DAILY_TEMPLATE.format(
         weather=weather, one=one, poem=poem
     )
     
-    #pic = make_pic_and_save(poem)
+    image_url = make_pic(sentence)
 
     print(body)
 
+    send_tg_message(tg_bot_token=TG_BOT_TOKEN, tg_chat_id=TG_CHAT_ID, message=body, image=image_url)
+
 if __name__ == "__main__":
+    #poem = get_poem()
+    #url = make_pic_and_save(poem)
+    #print(url)
+    #send_tg_message(tg_bot_token=TG_BOT_TOKEN, tg_chat_id=TG_CHAT_ID, message="Test", image="https://oaidalleapiprodscus.blob.core.windows.net/private/org-zfDwAeW4HeXmUDQYZINhnDTf/user-FkIh7lQLYN1ZRC4TjgNfCpOp/img-CGcGzfRToYoKCU2OLmeoqamc.png?st=2023-09-06T04%3A32%3A34Z&se=2023-09-06T06%3A32%3A34Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-09-05T07%3A50%3A34Z&ske=2023-09-06T07%3A50%3A34Z&sks=b&skv=2021-08-06&sig=X%2BII/Namoow1wCQ%2BzPuJ8Mb%2BsLQkx1Wem/vHvtjuwLs%3D")
     main()
+
