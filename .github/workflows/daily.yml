@@ -16,6 +16,11 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: main
+          
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
