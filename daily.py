@@ -106,21 +106,26 @@ def send_tg_message(tg_bot_token, tg_chat_id, message, image = None):
             request_url = "https://api.telegram.org/bot{tg_bot_token}/sendMessage".format(tg_bot_token = tg_bot_token)
             request_data = {'chat_id': tg_chat_id, 'text': message}
             response = requests.post(request_url, data=request_data)
+            return response.json()
         except Exception as e:
             print("Failed sending message to Telegram Bot.") 
             print(type(e), e) 
+            return ""
     else:
         try:
             photo_url = image
             request_url = "https://api.telegram.org/bot{tg_bot_token}/sendPhoto".format(tg_bot_token = tg_bot_token)
             request_data = {'chat_id': tg_chat_id, 'photo': photo_url, 'caption': message}
             response = requests.post(request_url, data=request_data)
+            return response.json()
         except Exception as e:
             print("Failed sending message to Telegram Bot with image.") 
             print(type(e), e) 
+            return ""
 
 
 def main():
+    print("Main started...")
     DAILY_TEMPLATE = "又到了新的一天了！\r\n---\r\n{weather}\r\n---\r\n今日名言：{one}\r\n---\r\n今日诗词：{poem}\r\n---\r\nHave a good day, good luck!"
     one = get_one()
     sentence, poem = get_poem()
@@ -131,9 +136,11 @@ def main():
     
     image_url = make_pic(sentence)
 
+    print("Message constructed:")
     print(body)
-
-    send_tg_message(tg_bot_token=TG_BOT_TOKEN, tg_chat_id=TG_CHAT_ID, message=body, image=image_url)
+    print("Sending to Telegram...")
+    r_json = send_tg_message(tg_bot_token=TG_BOT_TOKEN, tg_chat_id=TG_CHAT_ID, message=body, image=image_url)
+    print(r_json)
 
 if __name__ == "__main__":
     #poem = get_poem()
