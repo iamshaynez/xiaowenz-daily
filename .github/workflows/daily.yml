@@ -20,6 +20,9 @@ jobs:
         with:
           fetch-depth: 0
           ref: main
+      - name: Set Secrets
+        run: |
+          echo "TG_CHAT_ID=${{ secrets.TG_CHAT_ID }}"
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
