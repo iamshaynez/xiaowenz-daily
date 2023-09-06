@@ -12,7 +12,7 @@ load_dotenv()
 
 # required APIs
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-TIAN_API_KEY = os.getenv('TIAN_API_KEY')
+TIAN_API_KEY = os.getenv('TIAN_API_KEY') # https://www.tianapi.com/console/
 
 def make_pic_and_save(sentence):
     """
