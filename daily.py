@@ -16,6 +16,9 @@ TIAN_API_KEY = os.environ['TIAN_API_KEY'] # https://www.tianapi.com/console/
 TG_BOT_TOKEN = os.environ['TG_BOT_TOKEN']
 TG_CHAT_ID = os.environ['TG_CHAT_ID']
 
+print(f'TG_CHAT_ID >> {TG_CHAT_ID}')
+
+
 def make_pic(sentence):
     """
     return the link formd
