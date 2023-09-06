@@ -11,14 +11,14 @@ from github import Github
 load_dotenv()
 
 # required APIs
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-TIAN_API_KEY = os.getenv('TIAN_API_KEY') # https://www.tianapi.com/console/
-TG_BOT_TOKEN = os.getenv('TG_BOT_TOKEN')
-TG_CHAT_ID = os.getenv('TG_CHAT_ID')
+OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
+TIAN_API_KEY = os.environ['TIAN_API_KEY'] # https://www.tianapi.com/console/
+TG_BOT_TOKEN = os.environ['TG_BOT_TOKEN']
+TG_CHAT_ID = os.environ['TG_CHAT_ID']
 
 def make_pic(sentence):
     """
-    return the link for md
+    return the link formd
     """
     # do not add text on the png
     sentence = sentence + ", textless"

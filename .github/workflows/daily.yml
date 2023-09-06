@@ -20,12 +20,6 @@ jobs:
         with:
           fetch-depth: 0
           ref: main
-      - name: Set Secrets
-        run: |
-          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
-          echo "TIAN_API_KEY=${{ secrets.TIAN_API_KEY }}" >> .env
-          echo "TG_BOT_TOKEN=${{ secrets.TG_BOT_TOKEN }}" >> .env
-          echo "TG_CHAT_ID=${{ secrets.TG_CHAT_ID }}" >> .env
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
