@@ -10,15 +10,42 @@ from github import Github
 
 load_dotenv()
 
-# required APIs
+# required settings. config in github secrets
+# -------------
+# OpenAI: https://platform.openai.com/account/usage
 OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
+# TIAN_API_KEY: https://www.tianapi.com/console/
 TIAN_API_KEY = os.environ['TIAN_API_KEY'] # https://www.tianapi.com/console/
+# Telegram Bot Token
 TG_BOT_TOKEN = os.environ['TG_BOT_TOKEN']
+# Telegram Chat ID to want to send the message to
 TG_CHAT_ID = os.environ['TG_CHAT_ID']
+# -------------
 
-print(f'TG_CHAT_ID >> {TG_CHAT_ID}')
 
+# get random poem
+# return sentence(used for make pic) and poem(sentence with author and origin)
+def get_poem():
+    SENTENCE_API = "https://v1.jinrishici.com/all"
+    DEFAULT_SENTENCE = "落日净残阳\r\n雾水拈薄浪\r\n"
+    DEFAULT_POEM = "落日净残阳，雾水拈薄浪。 —— Xiaowen.Z / 卜算子"
+    POEM_TEMPLATE = "{sentence} —— {author} / {origin}"
 
+    try:
+        r = requests.get(SENTENCE_API)
+        if r.ok:
+            sentence = r.json().get("content")
+            poem = POEM_TEMPLATE.format(
+                sentence = sentence, author=r.json().get("author"), origin=r.json().get("origin")
+            )
+            return sentence, poem
+        return DEFAULT_SENTENCE, DEFAULT_POEM
+    except Exception as e:
+        print(type(e), e) 
+        return DEFAULT_SENTENCE, DEFAULT_POEM
+
+# create pic
+# return url, the image will not be save to local environment
 def make_pic(sentence):
     """
     return the link formd
@@ -49,25 +76,7 @@ def make_pic(sentence):
     
     return image_url
 
-def get_poem():
-    SENTENCE_API = "https://v1.jinrishici.com/all"
-    DEFAULT_SENTENCE = "落日净残阳\r\n雾水拈薄浪\r\n"
-    DEFAULT_POEM = "落日净残阳，雾水拈薄浪。 —— Xiaowen.Z / 卜算子"
-    POEM_TEMPLATE = "{sentence} —— {author} / {origin}"
-
-    try:
-        r = requests.get(SENTENCE_API)
-        if r.ok:
-            sentence = r.json().get("content")
-            poem = POEM_TEMPLATE.format(
-                sentence = sentence, author=r.json().get("author"), origin=r.json().get("origin")
-            )
-            return sentence, poem
-        return DEFAULT_SENTENCE, DEFAULT_POEM
-    except Exception as e:
-        print(type(e), e) 
-        return DEFAULT_SENTENCE, DEFAULT_POEM
-
+# get a random quota
 def get_one():
     ONE_API = "https://apis.tianapi.com/dictum/index?key={TIAN_API_KEY}&num=1".format(TIAN_API_KEY=TIAN_API_KEY)
     DEFAULT_ONE = "人生在勤，勤则不匮。 ——(北魏）贾思勰"
@@ -84,6 +93,8 @@ def get_one():
         print(type(e), e) 
         return DEFAULT_ONE
 
+# get today's weather
+# city hard coded in API URL. You may change it based on city code list below
 def get_weather():
     WEATHER_API = "http://t.weather.sojson.com/api/weather/city/101210101"
     # https://github.com/baichengzhou/weather.api/blob/master/src/main/resources/citycode-2019-08-23.json to find the city code
@@ -105,6 +116,8 @@ def get_weather():
         print(type(e), e) 
         return DEFAULT_WEATHER
 
+# send message to telegram
+# send image with caption if the image arg is not None
 def send_tg_message(tg_bot_token, tg_chat_id, message, image = None):
     print(f'Sending to Chat {tg_chat_id}')
     if image is None:
@@ -129,7 +142,9 @@ def send_tg_message(tg_bot_token, tg_chat_id, message, image = None):
             print(type(e), e) 
             return ""
 
-
+# make a template for message
+# generate content
+# send
 def main():
     print("Main started...")
     DAILY_TEMPLATE = "又到了新的一天了！\r\n\r\n{weather}\r\n---\r\n今日名言：{one}\r\n---\r\n今日诗词和配图：{poem}\r\n---\r\nHave a good day, good luck!"

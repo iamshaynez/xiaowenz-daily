@@ -1,15 +1,39 @@
+[![Daily](https://github.com/iamshaynez/xiaowenz-daily/actions/workflows/daily.yml/badge.svg)](https://github.com/iamshaynez/xiaowenz-daily/actions/workflows/daily.yml)
+
 # Daily
 
 每天生成一点点随机的信息，通过 Telegram Bot 发送给自己，给悲催的生活一点点惊喜。
 
-例子
+例子:
 
-> 又到了新的一天了！
-> 
-> 今天是2023-09-06 星期三，杭州市的天气是多云，高温 30℃，低温 24℃，空气质量指数48
-> ---
-> 今日名言：虚荣的人注视着自己的名字，光荣的人注视着祖国的事业 —— 马蒂
-> ---
-> 今日诗词和配图：闻道梅花坼晓风，雪堆遍满四山中。 —— 陆游 / 梅花绝句
-> ---
-> Have a good day, good luck!
+![image.png](https://vip2.loli.io/2023/09/07/OkwunKc8B7gDIJl.png)
+
+# How to use
+
+## Fork this project
+
+Well done.
+
+## Config the secrets in your repository
+
+~~~python
+# required settings. config in github secrets
+# -------------
+# OpenAI: https://platform.openai.com/account/usage
+OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
+# TIAN_API_KEY: https://www.tianapi.com/console/
+TIAN_API_KEY = os.environ['TIAN_API_KEY'] # https://www.tianapi.com/console/
+# Telegram Bot Token
+TG_BOT_TOKEN = os.environ['TG_BOT_TOKEN']
+# Telegram Chat ID to want to send the message to
+TG_CHAT_ID = os.environ['TG_CHAT_ID']
+# -------------
+~~~
+
+## Change the running time in daily.yml if you well
+
+Well done.
+
+## Cost
+
+Daily cost will be 0.02 USD if using OpenAI.
