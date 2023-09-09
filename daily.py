@@ -51,7 +51,7 @@ def make_pic(sentence):
     return the link formd
     """
     # do not add text on the png
-    sentence = sentence + ", textless"
+    sentence = sentence + ", textless, creative"
 
     #date_str = pendulum.now().to_date_string()
     new_path = os.path.join("OUT_DIR", "TMP_DIR")
@@ -155,7 +155,9 @@ def main():
         weather=weather, one=one, poem=poem
     )
     
-    image_url = make_pic(sentence)
+    sentence_processed = sentence.replace("，"," ").replace("。"," ")
+    print(f'Processed Sentence: {sentence_processed}')
+    image_url = make_pic(sentence_processed)
 
     print("Message constructed...")
     print(body)
