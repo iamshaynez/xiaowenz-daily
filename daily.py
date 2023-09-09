@@ -27,7 +27,7 @@ TG_CHAT_ID = os.environ['TG_CHAT_ID']
 # return sentence(used for make pic) and poem(sentence with author and origin)
 def get_poem():
     SENTENCE_API = "https://v1.jinrishici.com/all"
-    DEFAULT_SENTENCE = "落日净残阳\r\n雾水拈薄浪\r\n"
+    DEFAULT_SENTENCE = "落日净残阳 雾水拈薄浪 "
     DEFAULT_POEM = "落日净残阳，雾水拈薄浪。 —— Xiaowen.Z / 卜算子"
     POEM_TEMPLATE = "{sentence} —— {author} / {origin}"
 
