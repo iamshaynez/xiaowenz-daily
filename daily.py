@@ -50,8 +50,11 @@ def make_pic(sentence):
     """
     return the link formd
     """
-    # do not add text on the png
-    sentence = sentence + ", textless, creative"
+    # the image prompt generation
+    prompt_styles = ["Abstract", "Cubism", "Impressionism", "Expressionism", "Surrealism", "Art Nouveau", "Pop Art", "Futurism", "Minimalism", "Van Gogh-like"]
+    style = random.choice(prompt_styles)
+    prompt_sentence = sentence + f", textless, {style}"
+    print(f'Prompt Str: [{prompt_sentence}]')
 
     #date_str = pendulum.now().to_date_string()
     new_path = os.path.join("OUT_DIR", "TMP_DIR")
@@ -59,8 +62,8 @@ def make_pic(sentence):
         os.mkdir(new_path)  
     
     openai.api_key = OPENAI_API_KEY
-    response = openai.Image.create(prompt=sentence, n=1, size="1024x1024")
-    #print(f'make pic response: {response.json()}')
+    response = openai.Image.create(prompt=prompt_sentence, n=1, size="1024x1024")
+    
     image_url = response["data"][0]["url"]
     print(f'image_url:{image_url}')
     # s = requests.session()
