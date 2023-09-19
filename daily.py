@@ -51,7 +51,10 @@ def make_pic(sentence):
     return the link formd
     """
     # the image prompt generation
-    prompt_styles = ["Abstract", "Cubism", "Impressionism", "Expressionism", "Surrealism", "Art Nouveau", "Pop Art", "Futurism", "Minimalism", "Van Gogh-like"]
+    prompt_styles = ["Abstract Expressionism","Art Nouveau",
+                     "Surrealism","Impressionism","Cubism","Minimalism","Pop Art","Gothic","Romanticism","Fauvism",
+                     "Renaissance","Pixel Art","Graffiti","Japanese Ukiyo-e","Science Fiction","Steampunk",
+                     "Fantasy","Horror","Film Noir","Vintage"]
     style = random.choice(prompt_styles)
     prompt_sentence = sentence + f", textless, {style}"
     print(f'Prompt Str: [{prompt_sentence}]')
