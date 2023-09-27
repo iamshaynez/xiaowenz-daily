@@ -44,6 +44,22 @@ def get_poem():
         print(type(e), e) 
         return DEFAULT_SENTENCE, DEFAULT_POEM
 
+# create stable diffusion prompt
+# translate poem to english for better pic
+def make_pic_prompt(sentence):
+    openai.api_key = OPENAI_API_KEY
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a translator. Translate the chinese poem into english and return only the translated words."},
+                {"role": "user", "content": sentence},
+            ]
+        )
+        return response['choices'][0]['message']['content']
+    except Exception as e:
+        return sentence
+
 # create pic
 # return url, the image will not be save to local environment
 def make_pic(sentence):
@@ -56,8 +72,9 @@ def make_pic(sentence):
                      "Renaissance","Pixel Art","Graffiti","Japanese Ukiyo-e","Science Fiction","Steampunk",
                      "Fantasy","Horror","Film Noir","Vintage"]
     style = random.choice(prompt_styles)
-    prompt_sentence = sentence + f", textless, {style}"
+    prompt_sentence = make_pic_prompt(sentence) + f", textless, {style}"
     print(f'Prompt Str: [{prompt_sentence}]')
+
 
     #date_str = pendulum.now().to_date_string()
     new_path = os.path.join("OUT_DIR", "TMP_DIR")
@@ -148,6 +165,9 @@ def send_tg_message(tg_bot_token, tg_chat_id, message, image = None):
             print(type(e), e) 
             return ""
 
+
+
+
 # make a template for message
 # generate content
 # send
@@ -161,7 +181,7 @@ def main():
         weather=weather, one=one, poem=poem
     )
     
-    sentence_processed = sentence.replace("，"," ").replace("。"," ")
+    sentence_processed = sentence.replace("，"," ").replace("。"," ").replace("."," ")
     print(f'Processed Sentence: {sentence_processed}')
     image_url = make_pic(sentence_processed)
 
