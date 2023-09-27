@@ -56,7 +56,7 @@ def make_pic_prompt(sentence):
                 {"role": "user", "content": sentence},
             ]
         )
-        return response['choices'][0]['message']['content']
+        return response['choices'][0]['message']['content'].replace(","," ").replace("."," ")
     except Exception as e:
         return sentence
 
