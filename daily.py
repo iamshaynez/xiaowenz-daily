@@ -6,7 +6,7 @@ import openai
 import pendulum
 import requests
 from dotenv import load_dotenv
-from github import Github
+from BingImageCreator import ImageGen
 
 load_dotenv()
 
@@ -20,6 +20,8 @@ TIAN_API_KEY = os.environ['TIAN_API_KEY'] # https://www.tianapi.com/console/
 TG_BOT_TOKEN = os.environ['TG_BOT_TOKEN']
 # Telegram Chat ID to want to send the message to
 TG_CHAT_ID = os.environ['TG_CHAT_ID']
+# Bing Cookie if image to be generated from Dalle3, optional
+BING_COOKIE = os.environ.get('BING_COOKIE', '')
 # -------------
 
 
@@ -62,7 +64,7 @@ def make_pic_prompt(sentence):
 
 # create pic
 # return url, the image will not be save to local environment
-def make_pic(sentence):
+def make_pic_from_openai(sentence):
     """
     return the link formd
     """
@@ -98,6 +100,24 @@ def make_pic(sentence):
     #             output_file.write(chunk)
     
     return image_url
+
+# create pic from bing image generator
+# once Dalle3 api is available, this might be retired.
+def make_pic_from_bing(sentence, bing_cookie):
+    # for bing image when dall-e3 open drop this function
+    i = ImageGen(bing_cookie)
+    images = i.get_images(sentence)
+    return images
+
+def make_pic(sentence):
+    if BING_COOKIE is not None:
+        try:
+            return make_pic_from_bing(sentence, BING_COOKIE)[0]
+        except Exception as e:
+            print(f'Image generated from Bing failed: {type(e)}')
+    else:
+        print('Bing Cookie is not set. Use OpenAI to generate Image')
+    return make_pic_from_openai(sentence)
 
 # get a random quota
 def get_one():
@@ -183,8 +203,9 @@ def main():
     
     sentence_processed = sentence.replace("，"," ").replace("。"," ").replace("."," ")
     print(f'Processed Sentence: {sentence_processed}')
-    image_url = make_pic(sentence_processed)
 
+    image_url = make_pic(sentence_processed)
+    print(f'Image URL: {image_url}')
     print("Message constructed...")
     print(body)
     print("Sending to Telegram...")
@@ -193,4 +214,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
