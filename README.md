@@ -27,6 +27,8 @@ TIAN_API_KEY = os.environ['TIAN_API_KEY'] # https://www.tianapi.com/console/
 TG_BOT_TOKEN = os.environ['TG_BOT_TOKEN']
 # Telegram Chat ID to want to send the message to
 TG_CHAT_ID = os.environ['TG_CHAT_ID']
+# Bing Cookie if image to be generated from Dalle3, optional
+BING_COOKIE = os.environ.get('BING_COOKIE', '')
 # -------------
 ~~~
 

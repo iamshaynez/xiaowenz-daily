@@ -24,7 +24,6 @@ TG_CHAT_ID = os.environ['TG_CHAT_ID']
 BING_COOKIE = os.environ.get('BING_COOKIE', '')
 # -------------
 
-
 # get random poem
 # return sentence(used for make pic) and poem(sentence with author and origin)
 def get_poem():
@@ -99,7 +98,7 @@ def make_pic_from_openai(sentence):
     #         for chunk in response.iter_content(chunk_size=8192):
     #             output_file.write(chunk)
     
-    return image_url
+    return image_url, "Image powered by OpenAI Dalle-2"
 
 # create pic from bing image generator
 # once Dalle3 api is available, this might be retired.
@@ -107,17 +106,19 @@ def make_pic_from_bing(sentence, bing_cookie):
     # for bing image when dall-e3 open drop this function
     i = ImageGen(bing_cookie)
     images = i.get_images(sentence)
-    return images
+    return images, "Image powered by Bing Dalle-3"
 
 def make_pic(sentence):
     if BING_COOKIE is not None:
         try:
-            return make_pic_from_bing(sentence, BING_COOKIE)[0]
+            images, image_comment = make_pic_from_bing(sentence, BING_COOKIE)
+            return images[0], image_comment
         except Exception as e:
             print(f'Image generated from Bing failed: {type(e)}')
     else:
         print('Bing Cookie is not set. Use OpenAI to generate Image')
-    return make_pic_from_openai(sentence)
+    image_url, image_comment = make_pic_from_openai(sentence)
+    return image_url, image_comment
 
 # get a random quota
 def get_one():
@@ -193,19 +194,22 @@ def send_tg_message(tg_bot_token, tg_chat_id, message, image = None):
 # send
 def main():
     print("Main started...")
-    DAILY_TEMPLATE = "又到了新的一天了！\r\n\r\n{weather}\r\n---\r\n今日名言：{one}\r\n---\r\n今日诗词和配图：{poem}\r\n---\r\nHave a good day, good luck!"
+    DAILY_TEMPLATE = "又到了新的一天了！\r\n\r\n{weather}\r\n---\r\n今日名言：{one}\r\n---\r\n今日诗词和配图：{poem}\r\n---\r\n{comment}"
     one = get_one()
     sentence, poem = get_poem()
     weather = get_weather()
-    body = DAILY_TEMPLATE.format(
-        weather=weather, one=one, poem=poem
-    )
     
     sentence_processed = sentence.replace("，"," ").replace("。"," ").replace("."," ")
     print(f'Processed Sentence: {sentence_processed}')
 
-    image_url = make_pic(sentence_processed)
+    image_url, image_comment = make_pic(sentence_processed)
+
+    body = DAILY_TEMPLATE.format(
+        weather=weather, one=one, poem=poem, comment=image_comment
+    )
+
     print(f'Image URL: {image_url}')
+    print(f'Image Comment: {image_comment}')
     print("Message constructed...")
     print(body)
     print("Sending to Telegram...")
