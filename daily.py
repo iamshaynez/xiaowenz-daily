@@ -115,6 +115,7 @@ def make_pic(sentence):
             return images[0], image_comment
         except Exception as e:
             print(f'Image generated from Bing failed: {type(e)}')
+            print(type(e), e) 
     else:
         print('Bing Cookie is not set. Use OpenAI to generate Image')
     image_url, image_comment = make_pic_from_openai(sentence)
