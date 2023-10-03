@@ -32,3 +32,5 @@ jobs:
           TIAN_API_KEY: ${{ secrets.TIAN_API_KEY }}
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+          BING_COOKIE: ${{ secrets.BING_COOKIE }}
+          BING_URL: ${{ secrets.BING_URL }}
