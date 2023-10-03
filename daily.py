@@ -8,21 +8,57 @@ import requests
 from dotenv import load_dotenv
 from BingImageCreator import ImageGen
 
+from quota import make_quota
+
 load_dotenv()
 
 # required settings. config in github secrets
 # -------------
 # OpenAI: https://platform.openai.com/account/usage
 OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
-# TIAN_API_KEY: https://www.tianapi.com/console/
-TIAN_API_KEY = os.environ['TIAN_API_KEY'] # https://www.tianapi.com/console/
 # Telegram Bot Token
 TG_BOT_TOKEN = os.environ['TG_BOT_TOKEN']
 # Telegram Chat ID to want to send the message to
 TG_CHAT_ID = os.environ['TG_CHAT_ID']
-# Bing Cookie if image to be generated from Dalle3, optional
+# Get Weather Information: https://github.com/baichengzhou/weather.api/blob/master/src/main/resources/citycode-2019-08-23.json to find the city code
+WEATHER_CITY_CODE = os.environ['WEATHER_CITY_CODE']
+# -------------
+
+# Optional Settings. config in github secrets.
+# -------------
+# 每日一句名人名言 - TIAN_API_KEY: https://www.tianapi.com/console/
+TIAN_API_KEY = os.environ.get('TIAN_API_KEY', '') # https://www.tianapi.com/console/
+# Bing Cookie if image to be generated from Dalle3
 BING_COOKIE = os.environ.get('BING_COOKIE', '')
 # -------------
+
+# Message list
+MESSAGES = ['又到了新的一天了！']
+
+
+# get today's weather
+# city hard coded in API URL. You may change it based on city code list below
+def make_weather(city_code):
+    print(f'Start making weather...')
+    WEATHER_API = f'http://t.weather.sojson.com/api/weather/city/{city_code}'
+    # https://github.com/baichengzhou/weather.api/blob/master/src/main/resources/citycode-2019-08-23.json to find the city code
+    DEFAULT_WEATHER = "未查询到天气，好可惜啊"
+    WEATHER_TEMPLATE = "今天是{date} {week}，{city}的天气是{type}，{high}，{low}，空气质量指数{aqi}"
+
+    try:
+        r = requests.get(WEATHER_API)
+        if r.ok:
+            weather = WEATHER_TEMPLATE.format(
+                date=r.json().get("data").get("forecast")[0].get("ymd"), week=r.json().get("data").get("forecast")[0].get("week"),
+                city=r.json().get("cityInfo").get("city"),
+                type=r.json().get("data").get("forecast")[0].get("type"), high=r.json().get("data").get("forecast")[0].get("high"),
+                low=r.json().get("data").get("forecast")[0].get("low"), aqi=r.json().get("data").get("forecast")[0].get("aqi")
+            )
+            return weather
+        return DEFAULT_WEATHER
+    except Exception as e:
+        print(type(e), e) 
+        return DEFAULT_WEATHER
 
 # get random poem
 # return sentence(used for make pic) and poem(sentence with author and origin)
@@ -68,10 +104,7 @@ def make_pic_from_openai(sentence):
     return the link formd
     """
     # the image prompt generation
-    prompt_styles = ["Abstract Expressionism","Art Nouveau",
-                     "Surrealism","Impressionism","Cubism","Minimalism","Pop Art","Gothic","Romanticism","Fauvism",
-                     "Renaissance","Pixel Art","Graffiti","Japanese Ukiyo-e","Science Fiction","Steampunk",
-                     "Fantasy","Horror","Film Noir","Vintage"]
+    prompt_styles = ["Surrealism", "Impressionism", "Gothic architecture", "Retro futuristic", "Japanese ukiyo-e", "Abstract expressionism", "Art Nouveau", "SteamPunk", "CyberPunk", "Minimalist modern art", "Cubism", "Pop Art", "Art Deco", "Romanesque architecture", "Psychedelic art", "Neoclassicism", "Baroque", "Renaissance art", "Medieval tapestry", "Chinese ink painting", "Indian Mughal miniatures", "Graffiti street art", "Vintage travel posters", "Romanticism", "Fantasy art", "Science fiction space", "Post-Impressionism", "Fauvism", "Dadaism", "Constructivism"]
     style = random.choice(prompt_styles)
     prompt_sentence = make_pic_prompt(sentence) + f", textless, {style}"
     print(f'Prompt Str: [{prompt_sentence}]')
@@ -105,11 +138,17 @@ def make_pic_from_openai(sentence):
 def make_pic_from_bing(sentence, bing_cookie):
     # for bing image when dall-e3 open drop this function
     i = ImageGen(bing_cookie)
-    images = i.get_images(sentence)
+    # the image prompt generation
+    prompt_styles = ["Surrealism", "Impressionism", "Gothic architecture", "Retro futuristic", "Japanese ukiyo-e", "Abstract expressionism", "Art Nouveau", "SteamPunk", "CyberPunk", "Minimalist modern art", "Cubism", "Pop Art", "Art Deco", "Romanesque architecture", "Psychedelic art", "Neoclassicism", "Baroque", "Renaissance art", "Medieval tapestry", "Chinese ink painting", "Indian Mughal miniatures", "Graffiti street art", "Vintage travel posters", "Romanticism", "Fantasy art", "Science fiction space", "Post-Impressionism", "Fauvism", "Dadaism", "Constructivism"]
+    style = random.choice(prompt_styles)
+    prompt_sentence = make_pic_prompt(sentence) + f", textless, {style}"
+
+    images = i.get_images(prompt_sentence)
     return images, "Image powered by Bing Dalle-3"
 
+# try Dalle-3 from Bing first, then OpenAI Image API
 def make_pic(sentence):
-    if BING_COOKIE is not None:
+    if BING_COOKIE is not None and BING_COOKIE != '':
         try:
             images, image_comment = make_pic_from_bing(sentence, BING_COOKIE)
             return images[0], image_comment
@@ -121,45 +160,15 @@ def make_pic(sentence):
     image_url, image_comment = make_pic_from_openai(sentence)
     return image_url, image_comment
 
-# get a random quota
-def get_one():
-    ONE_API = "https://apis.tianapi.com/dictum/index?key={TIAN_API_KEY}&num=1".format(TIAN_API_KEY=TIAN_API_KEY)
-    DEFAULT_ONE = "人生在勤，勤则不匮。 ——(北魏）贾思勰"
-    ONE_TEMPLATE = "{content} —— {origin}"
-    try:
-        r = requests.get(ONE_API)
-        if r.ok:
-            one = ONE_TEMPLATE.format(
-                content=r.json().get("result").get("list")[0].get("content"),  origin=r.json().get("result").get("list")[0].get("mrname")
-            )
-            return one
-        return DEFAULT_ONE
-    except Exception as e:
-        print(type(e), e) 
-        return DEFAULT_ONE
+def make_poem():
+    print(f'Start making poem...')
+    sentence, poem = get_poem()
+    sentence_processed = sentence.replace("，"," ").replace("。"," ").replace("."," ")
+    print(f'Processed Sentence: {sentence_processed}')
+    image_url, image_comment = make_pic(sentence_processed)
+    poem_message = f'今日诗词和配图：{poem}\r\n{image_comment}'
 
-# get today's weather
-# city hard coded in API URL. You may change it based on city code list below
-def get_weather():
-    WEATHER_API = "http://t.weather.sojson.com/api/weather/city/101210101"
-    # https://github.com/baichengzhou/weather.api/blob/master/src/main/resources/citycode-2019-08-23.json to find the city code
-    DEFAULT_WEATHER = "未查询到天气，好可惜啊"
-    WEATHER_TEMPLATE = "今天是{date} {week}，{city}的天气是{type}，{high}，{low}，空气质量指数{aqi}"
-
-    try:
-        r = requests.get(WEATHER_API)
-        if r.ok:
-            weather = WEATHER_TEMPLATE.format(
-                date=r.json().get("data").get("forecast")[0].get("ymd"), week=r.json().get("data").get("forecast")[0].get("week"),
-                city=r.json().get("cityInfo").get("city"),
-                type=r.json().get("data").get("forecast")[0].get("type"), high=r.json().get("data").get("forecast")[0].get("high"),
-                low=r.json().get("data").get("forecast")[0].get("low"), aqi=r.json().get("data").get("forecast")[0].get("aqi")
-            )
-            return weather
-        return DEFAULT_WEATHER
-    except Exception as e:
-        print(type(e), e) 
-        return DEFAULT_WEATHER
+    return image_url, poem_message
 
 # send message to telegram
 # send image with caption if the image arg is not None
@@ -187,34 +196,33 @@ def send_tg_message(tg_bot_token, tg_chat_id, message, image = None):
             print(type(e), e) 
             return ""
 
+# generate content from list of messages
+def make_message(messages):
+    message = "\r\n---\r\n".join(messages)
+    return message
 
-
-
-# make a template for message
 # generate content
-# send
+# send to tg
 def main():
     print("Main started...")
-    DAILY_TEMPLATE = "又到了新的一天了！\r\n\r\n{weather}\r\n---\r\n今日名言：{one}\r\n---\r\n今日诗词和配图：{poem}\r\n---\r\n{comment}"
-    one = get_one()
-    sentence, poem = get_poem()
-    weather = get_weather()
-    
-    sentence_processed = sentence.replace("，"," ").replace("。"," ").replace("."," ")
-    print(f'Processed Sentence: {sentence_processed}')
+    # default process the poem, image and weather.
+    MESSAGES.append(make_weather(WEATHER_CITY_CODE))
+    image_url, poem_message = make_poem()
+    MESSAGES.append(poem_message)
 
-    image_url, image_comment = make_pic(sentence_processed)
+    # --------
+    # Optional process - Daily Quota
+    if TIAN_API_KEY is not None and TIAN_API_KEY != '':
+        MESSAGES.append(make_quota(TIAN_API_KEY))
+    # --------
 
-    body = DAILY_TEMPLATE.format(
-        weather=weather, one=one, poem=poem, comment=image_comment
-    )
 
-    print(f'Image URL: {image_url}')
-    print(f'Image Comment: {image_comment}')
+    # Build full content and send to TG
+    full_message = make_message(MESSAGES)
     print("Message constructed...")
-    print(body)
+    print()
     print("Sending to Telegram...")
-    r_json = send_tg_message(tg_bot_token=TG_BOT_TOKEN, tg_chat_id=TG_CHAT_ID, message=body, image=image_url)
+    r_json = send_tg_message(tg_bot_token=TG_BOT_TOKEN, tg_chat_id=TG_CHAT_ID, message=full_message, image=image_url)
     print(r_json)
 
 if __name__ == "__main__":
