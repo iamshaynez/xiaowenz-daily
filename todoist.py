@@ -7,6 +7,7 @@ import pendulum
 #TODOIST_API = os.environ.get('TODOIST_API', '')
 
 def make_todoist(todoist_api):
+    print('Start making todoist...')
     try:
         message = ""
         api = TodoistAPI(todoist_api)
@@ -33,6 +34,10 @@ def make_todoist(todoist_api):
             message += message_p2
         else:
             message += "\r\n没有 P2 优先级的任务..."
+        
+        inbox_id = get_inbox_project_id(api)
+        tasks_inbox = api.get_tasks(project_id = inbox_id)
+        message += f"\r\n收件箱里还有{len(tasks_inbox)}个待分拣任务..."
 
         message += "\r\n\r\nPowered by Todoist.com"
         print(f'Todoist Message...')
@@ -42,7 +47,13 @@ def make_todoist(todoist_api):
         print(error)
         return "获取Todoist数据失败..."
 
+def get_inbox_project_id(api):
+    projects = api.get_projects()
+    for project in projects:
+        if project.is_inbox_project is True:
+            return project.id
+    raise Exception("Failed on finding inbox project.")
+
+
 if __name__ == "__main__":
-    print(TODOIST_API)
-    make_todoist(TODOIST_API)
-    
+    print(make_todoist(TODOIST_API))
