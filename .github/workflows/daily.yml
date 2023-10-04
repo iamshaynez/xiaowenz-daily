@@ -35,3 +35,4 @@ jobs:
           BING_COOKIE: ${{ secrets.BING_COOKIE }}
           BING_URL: ${{ secrets.BING_URL }}
           WEATHER_CITY_CODE: ${{ secrets.WEATHER_CITY_CODE }}
+          TODOIST_API: ${{ secrets.TODOIST_API }}
