@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from BingImageCreator import ImageGen
 
 from quota import make_quota
+from todoist import make_todoist
 
 load_dotenv()
 
@@ -28,8 +29,10 @@ WEATHER_CITY_CODE = os.environ['WEATHER_CITY_CODE']
 # -------------
 # 每日一句名人名言 - TIAN_API_KEY: https://www.tianapi.com/console/
 TIAN_API_KEY = os.environ.get('TIAN_API_KEY', '') # https://www.tianapi.com/console/
-# Bing Cookie if image to be generated from Dalle3
+# Bing Cookie if image to be generated from Dalle3. Leave empty to use OpenAI by default
 BING_COOKIE = os.environ.get('BING_COOKIE', '')
+# 每日待办事项 todoist
+TODOIST_API = os.environ.get('TODOIST_API', '')
 # -------------
 
 # Message list
@@ -214,6 +217,11 @@ def main():
     # Optional process - Daily Quota
     if TIAN_API_KEY is not None and TIAN_API_KEY != '':
         MESSAGES.append(make_quota(TIAN_API_KEY))
+    # --------
+    # --------
+    # Optional process - 每日待办事项 todoist
+    if TODOIST_API is not None and TODOIST_API != '':
+        MESSAGES.append(make_todoist(TODOIST_API))
     # --------
 
 
