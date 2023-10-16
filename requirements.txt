@@ -5,3 +5,4 @@ openai
 python-dotenv
 todoist-api-python
 dalle3
+pandas
