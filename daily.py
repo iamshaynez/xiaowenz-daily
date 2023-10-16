@@ -143,9 +143,6 @@ def make_pic_from_openai(sentence):
 def make_pic_from_bing(sentence, bing_cookie):
     # for bing image when dall-e3 open drop this function
     i = ImageGen(bing_cookie)
-    # Instantiate the Dalle class with your cookie value
-    dalle = Dalle(bing_cookie)
-
     # the image prompt generation
     prompt_styles = ["Surrealism", "Impressionism", "Gothic architecture", "Retro futuristic", "Japanese ukiyo-e", "Abstract expressionism", "Art Nouveau", "SteamPunk", "CyberPunk", "Minimalist modern art", "Cubism", "Pop Art", "Art Deco", "Romanesque architecture", "Psychedelic art", "Neoclassicism", "Baroque", "Renaissance art", "Medieval tapestry", "Chinese ink painting", "Indian Mughal miniatures", "Graffiti street art", "Vintage travel posters", "Romanticism", "Fantasy art", "Science fiction space", "Post-Impressionism", "Fauvism", "Dadaism", "Constructivism"]
     style = random.choice(prompt_styles)
