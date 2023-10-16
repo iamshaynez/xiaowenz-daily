@@ -1,12 +1,9 @@
-import argparse
 import os
 import random
 
 import openai
-import pendulum
 import requests
 from dotenv import load_dotenv
-from BingImageCreator import ImageGen
 from dalle3 import Dalle
 
 
