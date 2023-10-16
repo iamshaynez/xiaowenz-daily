@@ -7,6 +7,8 @@ import pendulum
 import requests
 from dotenv import load_dotenv
 from BingImageCreator import ImageGen
+from dalle3 import Dalle
+
 
 from quota import make_quota
 from todoist import make_todoist
@@ -142,13 +144,20 @@ def make_pic_from_openai(sentence):
 # once Dalle3 api is available, this might be retired.
 def make_pic_from_bing(sentence, bing_cookie):
     # for bing image when dall-e3 open drop this function
-    i = ImageGen(bing_cookie)
+    # i = ImageGen(bing_cookie)
+    # Instantiate the Dalle class with your cookie value
+    dalle = Dalle(bing_cookie)
+
     # the image prompt generation
     prompt_styles = ["Surrealism", "Impressionism", "Gothic architecture", "Retro futuristic", "Japanese ukiyo-e", "Abstract expressionism", "Art Nouveau", "SteamPunk", "CyberPunk", "Minimalist modern art", "Cubism", "Pop Art", "Art Deco", "Romanesque architecture", "Psychedelic art", "Neoclassicism", "Baroque", "Renaissance art", "Medieval tapestry", "Chinese ink painting", "Indian Mughal miniatures", "Graffiti street art", "Vintage travel posters", "Romanticism", "Fantasy art", "Science fiction space", "Post-Impressionism", "Fauvism", "Dadaism", "Constructivism"]
     style = random.choice(prompt_styles)
     prompt_sentence = make_pic_prompt(sentence) + f", textless, {style}"
 
-    images = i.get_images(prompt_sentence)
+    #images = i.get_images(prompt_sentence)
+    dalle.create(prompt_sentence)
+    # Get the image URLs
+    images = dalle.get_urls()
+
     return images, "Image powered by Bing Dalle-3"
 
 # try Dalle-3 from Bing first, then OpenAI Image API

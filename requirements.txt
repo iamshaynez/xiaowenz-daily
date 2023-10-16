@@ -4,5 +4,5 @@ pendulum
 rich
 openai
 python-dotenv
-BingImageCreator==0.4.4
 todoist-api-python
+dalle3
