@@ -1,4 +1,5 @@
 PyGithub
+pendulum
 requests
 rich
 openai
