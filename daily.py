@@ -136,7 +136,7 @@ def make_pic_from_openai(sentence):
     #         for chunk in response.iter_content(chunk_size=8192):
     #             output_file.write(chunk)
     
-    return image_url, "Image powered by OpenAI Dalle-2"
+    return image_url, "Image Powered by OpenAI DELL.E-2"
 
 # create pic from bing image generator
 # once Dalle3 api is available, this might be retired.
@@ -149,7 +149,7 @@ def make_pic_from_bing(sentence, bing_cookie):
     prompt_sentence = make_pic_prompt(sentence) + f", textless, {style}"
     
     images = i.get_images(prompt_sentence)
-    return images, "Image powered by Bing Dalle-3"
+    return images, "Image Powered by Bing DALL.E-3"
 
 # try Dalle-3 from Bing first, then OpenAI Image API
 def make_pic(sentence):
