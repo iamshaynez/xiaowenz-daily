@@ -54,6 +54,3 @@ def get_inbox_project_id(api):
             return project.id
     raise Exception("Failed on finding inbox project.")
 
-
-if __name__ == "__main__":
-    print(make_todoist(TODOIST_API))

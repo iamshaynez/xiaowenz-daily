@@ -2,7 +2,8 @@ import argparse
 import os
 import random
 
-import openai
+from openai import OpenAI
+
 import pendulum
 import requests
 from dotenv import load_dotenv
@@ -30,7 +31,8 @@ WEATHER_CITY_CODE = os.environ.get('WEATHER_CITY_CODE', '101210101')
 # Optional Settings. config in github secrets.
 # -------------
 # 每日一句名人名言 - TIAN_API_KEY: https://www.tianapi.com/console/
-TIAN_API_KEY = os.environ.get('TIAN_API_KEY', '') # https://www.tianapi.com/console/
+# https://www.tianapi.com/console/
+TIAN_API_KEY = os.environ.get('TIAN_API_KEY', '')
 # Bing Cookie if image to be generated from Dalle3. Leave empty to use OpenAI by default
 BING_COOKIE = os.environ.get('BING_COOKIE', '')
 # 每日待办事项 todoist
@@ -62,11 +64,13 @@ def make_weather(city_code):
             return weather
         return DEFAULT_WEATHER
     except Exception as e:
-        print(type(e), e) 
+        print(type(e), e)
         return DEFAULT_WEATHER
 
 # get random poem
 # return sentence(used for make pic) and poem(sentence with author and origin)
+
+
 def get_poem():
     SENTENCE_API = "https://v1.jinrishici.com/all"
     DEFAULT_SENTENCE = "落日净残阳 雾水拈薄浪 "
@@ -78,53 +82,71 @@ def get_poem():
         if r.ok:
             sentence = r.json().get("content")
             poem = POEM_TEMPLATE.format(
-                sentence = sentence, author=r.json().get("author"), origin=r.json().get("origin")
+                sentence=sentence, author=r.json().get("author"), origin=r.json().get("origin")
             )
             return sentence, poem
         return DEFAULT_SENTENCE, DEFAULT_POEM
     except Exception as e:
-        print(type(e), e) 
+        print(type(e), e)
         return DEFAULT_SENTENCE, DEFAULT_POEM
 
 # create stable diffusion prompt
 # translate poem to english for better pic
 def make_pic_prompt(sentence):
-    openai.api_key = OPENAI_API_KEY
+    client = OpenAI(
+        # defaults to os.environ.get("OPENAI_API_KEY")
+        api_key=OPENAI_API_KEY,
+    )
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+        print(f'')
+        chat_completion = client.chat.completions.create(
             messages=[
                 {"role": "system", "content": "You are a translator. Translate the chinese poem into english and return only the translated words."},
-                {"role": "user", "content": sentence},
-            ]
+                {
+                    "role": "user",
+                    "content": sentence,
+                }
+            ],
+            model="gpt-3.5-turbo",
         )
-        return response['choices'][0]['message']['content'].replace(","," ").replace("."," ")
+        print(chat_completion)
+        return chat_completion.choices[0].message.content.replace(",", " ").replace(".", " ")
     except Exception as e:
         return sentence
 
 # create pic
 # return url, the image will not be save to local environment
+
+
 def make_pic_from_openai(sentence):
     """
     return the link formd
     """
     # the image prompt generation
-    prompt_styles = ["Surrealism", "Impressionism", "Gothic architecture", "Retro futuristic", "Japanese ukiyo-e", "Abstract expressionism", "Art Nouveau", "SteamPunk", "CyberPunk", "Minimalist modern art", "Cubism", "Pop Art", "Art Deco", "Romanesque architecture", "Psychedelic art", "Neoclassicism", "Baroque", "Renaissance art", "Medieval tapestry", "Chinese ink painting", "Indian Mughal miniatures", "Graffiti street art", "Vintage travel posters", "Romanticism", "Fantasy art", "Science fiction space", "Post-Impressionism", "Fauvism", "Dadaism", "Constructivism"]
+    prompt_styles = ["Surrealism", "Impressionism", "Gothic architecture", "Retro futuristic", "Japanese ukiyo-e", "Abstract expressionism", "Art Nouveau", "SteamPunk", "CyberPunk", "Minimalist modern art", "Cubism", "Pop Art", "Art Deco", "Romanesque architecture", "Psychedelic art",
+                     "Neoclassicism", "Baroque", "Renaissance art", "Medieval tapestry", "Chinese ink painting", "Indian Mughal miniatures", "Graffiti street art", "Vintage travel posters", "Romanticism", "Fantasy art", "Science fiction space", "Post-Impressionism", "Fauvism", "Dadaism", "Constructivism"]
     style = random.choice(prompt_styles)
     prompt_sentence = make_pic_prompt(sentence) + f", textless, {style}"
     print(f'Prompt Str: [{prompt_sentence}]')
 
-
-    #date_str = pendulum.now().to_date_string()
+    # date_str = pendulum.now().to_date_string()
     new_path = os.path.join("OUT_DIR", "TMP_DIR")
     if not os.path.exists(new_path):
-        os.mkdir(new_path)  
-    
-    openai.api_key = OPENAI_API_KEY
-    response = openai.Image.create(prompt=prompt_sentence, n=1, size="1024x1024")
-    
-    image_url = response["data"][0]["url"]
+        os.mkdir(new_path)
+
+    # openai.api_key = OPENAI_API_KEY
+    client = OpenAI(
+        # defaults to os.environ.get("OPENAI_API_KEY")
+        api_key=OPENAI_API_KEY,
+    )
+    print(f'calling open ai for image creation...')
+    response = client.images.generate(
+        prompt=prompt_sentence, n=1, size="1024x1024")
+
+    image_url = response.data[0].url
     print(f'image_url:{image_url}')
+    print(f'image_revised_prompt: {response.data[0].revised_prompt}')
+    print(f'full response: {response}')
     # s = requests.session()
     # index = 0
     # while os.path.exists(os.path.join(new_path, f"{index}.jpeg")):
@@ -135,23 +157,29 @@ def make_pic_from_openai(sentence):
     #     with open(os.path.join(new_path, f"{index}.jpeg"), "wb") as output_file:
     #         for chunk in response.iter_content(chunk_size=8192):
     #             output_file.write(chunk)
-    
-    return image_url, "Image Powered by OpenAI DELL.E-2"
+
+    return image_url, "Image Powered by OpenAI DELL.E-3"
 
 # create pic from bing image generator
 # once Dalle3 api is available, this might be retired.
+
+
 def make_pic_from_bing(sentence, bing_cookie):
     # for bing image when dall-e3 open drop this function
     i = ImageGen(bing_cookie)
     # the image prompt generation
-    prompt_styles = ["Surrealism", "Impressionism", "Gothic architecture", "Retro futuristic", "Japanese ukiyo-e", "Abstract expressionism", "Art Nouveau", "SteamPunk", "CyberPunk", "Minimalist modern art", "Cubism", "Pop Art", "Art Deco", "Romanesque architecture", "Psychedelic art", "Neoclassicism", "Baroque", "Renaissance art", "Medieval tapestry", "Chinese ink painting", "Indian Mughal miniatures", "Graffiti street art", "Vintage travel posters", "Romanticism", "Fantasy art", "Science fiction space", "Post-Impressionism", "Fauvism", "Dadaism", "Constructivism"]
+    prompt_styles = ["Surrealism", "Impressionism", "Gothic architecture", "Retro futuristic", "Japanese ukiyo-e", "Abstract expressionism", "Art Nouveau", "SteamPunk", "CyberPunk", "Minimalist modern art", "Cubism", "Pop Art", "Art Deco", "Romanesque architecture", "Psychedelic art",
+                     "Neoclassicism", "Baroque", "Renaissance art", "Medieval tapestry", "Chinese ink painting", "Indian Mughal miniatures", "Graffiti street art", "Vintage travel posters", "Romanticism", "Fantasy art", "Science fiction space", "Post-Impressionism", "Fauvism", "Dadaism", "Constructivism"]
     style = random.choice(prompt_styles)
-    prompt_sentence = make_pic_prompt(sentence) + f", wired style, textless, {style}"
-    
+    prompt_sentence = make_pic_prompt(
+        sentence) + f", wired style, textless, {style}"
+
     images = i.get_images(prompt_sentence)
     return images, "Image Powered by Bing DALL.E-3"
 
 # try Dalle-3 from Bing first, then OpenAI Image API
+
+
 def make_pic(sentence):
     if BING_COOKIE is not None and BING_COOKIE != '':
         try:
@@ -159,16 +187,18 @@ def make_pic(sentence):
             return images[0], image_comment
         except Exception as e:
             print(f'Image generated from Bing failed: {type(e)}')
-            print(type(e), e) 
+            print(type(e), e)
     else:
         print('Bing Cookie is not set. Use OpenAI to generate Image')
     image_url, image_comment = make_pic_from_openai(sentence)
     return image_url, image_comment
 
+
 def make_poem():
     print(f'Start making poem...')
     sentence, poem = get_poem()
-    sentence_processed = sentence.replace("，"," ").replace("。"," ").replace("."," ")
+    sentence_processed = sentence.replace(
+        "，", " ").replace("。", " ").replace(".", " ")
     print(f'Processed Sentence: {sentence_processed}')
     image_url, image_comment = make_pic(sentence_processed)
     poem_message = f'今日诗词和配图：{poem}\r\n\r\n{image_comment}'
@@ -177,37 +207,46 @@ def make_poem():
 
 # send message to telegram
 # send image with caption if the image arg is not None
-def send_tg_message(tg_bot_token, tg_chat_id, message, image = None):
+
+
+def send_tg_message(tg_bot_token, tg_chat_id, message, image=None):
     print(f'Sending to Chat {tg_chat_id}')
     if image is None:
         try:
-            request_url = "https://api.telegram.org/bot{tg_bot_token}/sendMessage".format(tg_bot_token = tg_bot_token)
+            request_url = "https://api.telegram.org/bot{tg_bot_token}/sendMessage".format(
+                tg_bot_token=tg_bot_token)
             request_data = {'chat_id': tg_chat_id, 'text': message}
             response = requests.post(request_url, data=request_data)
             return response.json()
         except Exception as e:
-            print("Failed sending message to Telegram Bot.") 
-            print(type(e), e) 
+            print("Failed sending message to Telegram Bot.")
+            print(type(e), e)
             return ""
     else:
         try:
             photo_url = image
-            request_url = "https://api.telegram.org/bot{tg_bot_token}/sendPhoto".format(tg_bot_token = tg_bot_token)
-            request_data = {'chat_id': tg_chat_id, 'photo': photo_url, 'caption': message}
+            request_url = "https://api.telegram.org/bot{tg_bot_token}/sendPhoto".format(
+                tg_bot_token=tg_bot_token)
+            request_data = {'chat_id': tg_chat_id,
+                            'photo': photo_url, 'caption': message}
             response = requests.post(request_url, data=request_data)
             return response.json()
         except Exception as e:
-            print("Failed sending message to Telegram Bot with image.") 
-            print(type(e), e) 
+            print("Failed sending message to Telegram Bot with image.")
+            print(type(e), e)
             return ""
 
 # generate content from list of messages
+
+
 def make_message(messages):
     message = "\r\n---\r\n".join(messages)
     return message
 
 # generate content
 # send to tg
+
+
 def main():
     print("Main started...")
     # default process the poem, image and weather.
@@ -226,14 +265,15 @@ def main():
         MESSAGES.append(make_todoist(TODOIST_API))
     # --------
 
-
     # Build full content and send to TG
     full_message = make_message(MESSAGES)
     print("Message constructed...")
     print()
     print("Sending to Telegram...")
-    r_json = send_tg_message(tg_bot_token=TG_BOT_TOKEN, tg_chat_id=TG_CHAT_ID, message=full_message, image=image_url)
+    r_json = send_tg_message(tg_bot_token=TG_BOT_TOKEN,
+                             tg_chat_id=TG_CHAT_ID, message=full_message, image=image_url)
     print(r_json)
+
 
 if __name__ == "__main__":
     main()
