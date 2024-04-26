@@ -10,42 +10,6 @@
 
 # How to use
 
-## Fork this project
+目前这个脚本不再适用于 Force 以后自行运行了。因为各种原因，我把配置从 Github 的 Secret 修改到了基于 Cloudflare R2 的配置中心。实现了中心化的配置管理，但 Github 中的 Action 不再无状态了。
 
-Well done.
-
-## Config the secrets in your repository
-
-~~~python
-# required settings. config in github secrets
-# -------------
-# OpenAI: https://platform.openai.com/account/usage
-OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
-# Telegram Bot Token
-TG_BOT_TOKEN = os.environ['TG_BOT_TOKEN']
-# Telegram Chat ID to want to send the message to
-TG_CHAT_ID = os.environ['TG_CHAT_ID']
-# Get Weather Information: https://github.com/baichengzhou/weather.api/blob/master/src/main/resources/citycode-2019-08-23.json to find the city code
-# Shanghai 101020100
-# Hangzhou 101210101 by default
-WEATHER_CITY_CODE = os.environ.get('WEATHER_CITY_CODE', '101210101')
-# -------------
-
-# Optional Settings. config in github secrets.
-# -------------
-# 每日一句名人名言 - TIAN_API_KEY: https://www.tianapi.com/console/
-TIAN_API_KEY = os.environ.get('TIAN_API_KEY', '') # https://www.tianapi.com/console/
-# Bing Cookie if image to be generated from Dalle3. Leave empty to use OpenAI by default
-BING_COOKIE = os.environ.get('BING_COOKIE', '')
-# 每日待办事项 todoist
-TODOIST_API = os.environ.get('TODOIST_API', '')
-# -------------
-~~~
-
-## Change the running time in daily.yml if you well
-
-Well done.
-
-## Cost
-
-Daily cost will be 0.02 USD if using OpenAI.
+后续我会更新所有的依赖关系和配置方式，但当前只供自己运行，文档完善前有兴趣可以私下找我讨论细节。

@@ -4,5 +4,7 @@ pendulum
 rich
 openai
 python-dotenv
-git+https://github.com/yihong0618/BingImageCreator.git
+git+https://github.com/iamshaynez/IdeoImageCreator.git
+git+https://github.com/iamshaynez/R2ConfigCenter.git
+poe_api_wrapper
 todoist-api-python

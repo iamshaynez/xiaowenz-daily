@@ -1,42 +1,34 @@
-import argparse
 import os
 import random
-
 from openai import OpenAI
 
-import pendulum
 import requests
 from dotenv import load_dotenv
-from BingImageCreator import ImageGen
-
+from ideo import ImageGen
+from ConfigCenter import R2Config
 from quota import make_quota
 from todoist import make_todoist
 
 load_dotenv()
-
-# required settings. config in github secrets
 # -------------
-# OpenAI: https://platform.openai.com/account/usage
-OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
+config = R2Config()
+openai_json = config.read_json(f'openai_{os.environ["OPENAI_ACCOUNT"]}.json')
+OPENAI_API_KEY = openai_json['OPENAI_API_KEY']
+OPENAI_BASE_URL = openai_json['OPENAI_BASE_URL']
+tg_json = config.read_json(f'tgbot_iMessage.json')
 # Telegram Bot Token
-TG_BOT_TOKEN = os.environ['TG_BOT_TOKEN']
+TG_BOT_TOKEN = tg_json['TG_BOT_TOKEN']
 # Telegram Chat ID to want to send the message to
-TG_CHAT_ID = os.environ['TG_CHAT_ID']
+TG_CHAT_ID = tg_json['TG_CHAT_ID']
 # Get Weather Information: https://github.com/baichengzhou/weather.api/blob/master/src/main/resources/citycode-2019-08-23.json to find the city code
 # Shanghai 101020100
 # Hangzhou 101210101 by default
-WEATHER_CITY_CODE = os.environ.get('WEATHER_CITY_CODE', '101210101')
-# -------------
-
-# Optional Settings. config in github secrets.
-# -------------
+WEATHER_CITY_CODE = config.read_text('WEATHER_CITY_CODE')
 # 每日一句名人名言 - TIAN_API_KEY: https://www.tianapi.com/console/
 # https://www.tianapi.com/console/
-TIAN_API_KEY = os.environ.get('TIAN_API_KEY', '')
-# Bing Cookie if image to be generated from Dalle3. Leave empty to use OpenAI by default
-BING_COOKIE = os.environ.get('BING_COOKIE', '')
+TIAN_API_KEY = config.read_text('TIAN_API_KEY')
 # 每日待办事项 todoist
-TODOIST_API = os.environ.get('TODOIST_API', '')
+TODOIST_API = config.read_text('TODOIST_API')
 # -------------
 
 # Message list
@@ -127,23 +119,27 @@ def make_pic_from_openai(sentence):
 # once Dalle3 api is available, this might be retired.
 
 
-def make_pic_from_bing(sentence, bing_cookie):
+def make_pic_from_ideo(sentence):
     # for bing image when dall-e3 open drop this function
-    i = ImageGen(bing_cookie)
+    i = ImageGen()
     images = i.get_images(sentence)
-    return images, "Image Powered by Bing DALL.E-3"
+    return images, "Image Powered by Ideogram ConfigCenter"
+
+
+
 
 # try Dalle-3 from Bing first, then OpenAI Image API
 def make_pic(sentence):
-    if BING_COOKIE is not None and BING_COOKIE != '':
+    if True:
         try:
-            images, image_comment = make_pic_from_bing(sentence, BING_COOKIE)
-            return images[0], image_comment
+            images, image_comment = make_pic_from_ideo(sentence)
+            return random.choice(images), image_comment
         except Exception as e:
-            print(f'Image generated from Bing failed: {type(e)}')
+            print(f'Image generated from Ideogram failed: {type(e)}')
             print(type(e), e)
     else:
-        print('Bing Cookie is not set. Use OpenAI to generate Image')
+        print('Ideo Cookie is not set. Use OpenAI to generate Image')
+        
     image_url, image_comment = make_pic_from_openai(sentence)
     return image_url, image_comment
 
@@ -161,8 +157,6 @@ def make_poem():
 
 # send message to telegram
 # send image with caption if the image arg is not None
-
-
 def send_tg_message(tg_bot_token, tg_chat_id, message, image=None):
     print(f'Sending to Chat {tg_chat_id}')
     if image is None:

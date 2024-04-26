@@ -23,16 +23,14 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
+          pip install --force PyJWT
       - name: Generate new daily
         run: |
           python daily.py 
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          TIAN_API_KEY: ${{ secrets.TIAN_API_KEY }}
-          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
-          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
-          BING_COOKIE: ${{ secrets.BING_COOKIE }}
-          BING_URL: ${{ secrets.BING_URL }}
-          WEATHER_CITY_CODE: ${{ secrets.WEATHER_CITY_CODE }}
-          TODOIST_API: ${{ secrets.TODOIST_API }}
+          CF_R2_REGION: ${{ secrets.CF_R2_REGION }}
+          CF_R2_ACCOUNT_ID: ${{ secrets.CF_R2_ACCOUNT_ID }}
+          CF_R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          CF_R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          CF_R2_BUCKET_NAME: ${{ secrets.CF_R2_BUCKET_NAME }}
+          OPENAI_ACCOUNT: ${{ secrets.OPENAI_ACCOUNT }}
