@@ -6,7 +6,7 @@
 
 例子:
 
-![image.png](https://vip2.loli.io/2023/09/07/OkwunKc8B7gDIJl.png)
+![image.png](https://cdn.sa.net/2024/04/26/dArz5O29nmkXhVv.png)
 
 # How to use
 
