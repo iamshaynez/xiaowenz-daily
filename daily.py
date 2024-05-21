@@ -92,7 +92,7 @@ def make_pic_from_openai(sentence):
     # openai.api_key = OPENAI_API_KEY
     client = OpenAI(
         # defaults to os.environ.get("OPENAI_API_KEY")
-        api_key=OPENAI_API_KEY,
+        api_key=OPENAI_API_KEY, base_url=OPENAI_BASE_URL
     )
     print(f'calling open ai for image creation...')
     response = client.images.generate(
@@ -130,15 +130,15 @@ def make_pic_from_ideo(sentence):
 
 # try Dalle-3 from Bing first, then OpenAI Image API
 def make_pic(sentence):
-    if True:
-        try:
-            images, image_comment = make_pic_from_ideo(sentence)
-            return random.choice(images), image_comment
-        except Exception as e:
-            print(f'Image generated from Ideogram failed: {type(e)}')
-            print(type(e), e)
-    else:
-        print('Ideo Cookie is not set. Use OpenAI to generate Image')
+    # if True:
+    #     try:
+    #         images, image_comment = make_pic_from_ideo(sentence)
+    #         return random.choice(images), image_comment
+    #     except Exception as e:
+    #         print(f'Image generated from Ideogram failed: {type(e)}')
+    #         print(type(e), e)
+    # else:
+    #     print('Ideo Cookie is not set. Use OpenAI to generate Image')
         
     image_url, image_comment = make_pic_from_openai(sentence)
     return image_url, image_comment
