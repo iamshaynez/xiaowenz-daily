@@ -115,18 +115,6 @@ def make_pic_from_openai(sentence):
 
     return image_url, "Image Powered by OpenAI DELL.E-3"
 
-# create pic from bing image generator
-# once Dalle3 api is available, this might be retired.
-
-
-def make_pic_from_ideo(sentence):
-    # for bing image when dall-e3 open drop this function
-    i = ImageGen()
-    images = i.get_images(sentence)
-    return images, "Image Powered by Ideogram ConfigCenter"
-
-
-
 
 # try Dalle-3 from Bing first, then OpenAI Image API
 def make_pic(sentence):
@@ -139,8 +127,8 @@ def make_pic(sentence):
     #         print(type(e), e)
     # else:
     #     print('Ideo Cookie is not set. Use OpenAI to generate Image')
-        
-    image_url, image_comment = make_pic_from_openai(sentence)
+    prompt = f'{sentence} in sarcasm and joke style, digital illustration' 
+    image_url, image_comment = make_pic_from_openai(prompt)
     return image_url, image_comment
 
 
