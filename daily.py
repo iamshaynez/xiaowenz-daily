@@ -70,7 +70,7 @@ def get_poem():
     POEM_TEMPLATE = "{sentence} —— {author} / {origin}"
 
     try:
-        r = requests.get(SENTENCE_API)
+        r = requests.get(SENTENCE_API, verify=False)
         if r.ok:
             sentence = r.json().get("content")
             poem = POEM_TEMPLATE.format(
